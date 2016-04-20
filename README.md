@@ -35,7 +35,7 @@ implements the 0.9.1 version of the AMQP protocol.
 
 ## Installation
 
-    npm install amqp
+    npm install rova-amqp
 
 ## Synopsis
 
@@ -305,6 +305,9 @@ If this option is used `q.shift()` should not be called. Instead the listener
 function should take four parameters `(message, headers, deliveryInfo, ack)` and
 `ack.acknowledge()` should be called to ack a single message.
 
+When set schema path option `{schema: "/path/to/schemas"}`. Consumer will validate event payload by schema that specific in content_type header.
+ex : content_type: "avro/json+pet" . schema /path/to/schemas/pet.avsc will be use to validate payload.
+
 The `routingKeyInPayload` and `deliveryKeyInPayload` options determine
 if the reception process will inject the routingKey and deliveryKey,
 respectively, into the JSON payload received.  These default to unset
@@ -482,6 +485,19 @@ An exchange will emit the `'open'` event when it is finally declared.
 
 
 ### exchange.publish(routingKey, message, options, callback)
+
+```javascript
+var connection = rovaAmqp.createConnection({ host: 'localhost', port: 5672 });
+
+connection.on('ready', function () {
+  var exec = connection.exchange('amqp.exc', {type: 'topic', durable: true}, function (exchange)
+  {
+    exchange.publish('routing.key',{"kind": "CAT", "name": "milu"}, {contentType: 'avro/json+pet', schema: '/path/to/schemas'}, function (res,err) {
+      console.log("err:", err);
+    });
+  });
+});
+```
 
 Publishes a message to the exchange. The `routingKey` argument is a string
 which helps routing in `topic` and `direct` exchanges. The `message` can be
