@@ -5,7 +5,7 @@
 This is a client for RabbitMQ (and maybe other servers?). It partially
 implements the 0.9.1 version of the AMQP protocol.
 
-## Table of Contents 
+## Table of Contents
 
 - [Installation](#installation)
 - [Synopsis](#synopsis)
@@ -44,7 +44,7 @@ IMPORTANT: This module only works with node v0.4.0 and later.
 An example of connecting to a server and listening on a queue.
 
 ```javascript
-var amqp = require('amqp');
+var amqp = require('rova-amqp');
 
 var connection = amqp.createConnection({ host: 'dev.rabbitmq.com' });
 
@@ -54,7 +54,7 @@ connection.on('ready', function () {
   connection.queue('my-queue', function (q) {
       // Catch all messages
       q.bind('#');
-    
+
       // Receive messages
       q.subscribe(function (message) {
         // Print messages to stdout
@@ -268,7 +268,7 @@ Returns a reference to a queue. The name parameter is required, unlike pika whic
     If set, the queue will not be declared, this will allow a queue to be
     deleted if you don't know its previous options.
 - `arguments`: a map of additional arguments to pass in when creating a queue.
-- `closeChannelOnUnsubscribe` : a boolean when true the channel will close on 
+- `closeChannelOnUnsubscribe` : a boolean when true the channel will close on
     unsubscribe, default false.
 
 ### queue.subscribe([options,] listener)
@@ -279,7 +279,14 @@ An easy subscription command. It works like this
 q.subscribe(function (message, headers, deliveryInfo, messageObject) {
   console.log('Got a message with routing key ' + deliveryInfo.routingKey);
 });
-    
+
+```
+
+Using avro schema : Set schema path
+```javascript
+q.subscribe({schema: "/path/to/schemas"},function (message, headers, deliveryInfo, messageObject) {
+  console.log('Got a message with routing key ' + deliveryInfo.routingKey);
+});
 ```
 
 It will automatically acknowledge receipt of each message.
@@ -288,13 +295,13 @@ There are several options available.  Setting the options argument to
 `{ ack: true }` (which defaults to false) will make it so that the AMQP
 server only delivers a single message at a time. When you want the next
 message, call `q.shift()`. When `ack` is false then you will receive
-messages as fast as they come in. 
+messages as fast as they come in.
 
 You can also use the prefetchCount option to increase the window of how
 many messages the server will send you before you need to ack (quality of service).
 `{ ack: true, prefetchCount: 1 }` is the default and will only send you one
 message before you ack. Setting prefetchCount to 0 will make that window unlimited.
-If this option is used `q.shift()` should not be called. Instead the listener 
+If this option is used `q.shift()` should not be called. Instead the listener
 function should take four parameters `(message, headers, deliveryInfo, ack)` and
 `ack.acknowledge()` should be called to ack a single message.
 
@@ -312,10 +319,10 @@ option passed when creating in a queue in that the queue itself is not exclusive
 only the consumers. This means that long lived durable queues can be used
 as exclusive queues.
 
-The `messageObject` can be used to acknowledge a given message using: 
+The `messageObject` can be used to acknowledge a given message using:
 ```javascript
 messageObject.acknowledge(false); // use true if you want to acknowledge all previous messages of the queue
-``` 
+```
 If the `consumer_cancel_notify` capability was enabled when the connection was
 created, the queue will emit `basicCancel` upon receiving a consumer cancel
 notification from the server.  The queue's channel will be automatically closed.
@@ -417,8 +424,8 @@ the queue will only be deleted if there are no consumers. If
 +options.ifEmpty+ is true, the queue will only be deleted if it has no
 messages.
 
-Note: the successful destruction of a queue will cause a consumer cancel 
-notification to be emitted (for clients who have enabled the 
+Note: the successful destruction of a queue will cause a consumer cancel
+notification to be emitted (for clients who have enabled the
 `consumer_cancel_notify` option when creating the connection).
 
 
@@ -467,7 +474,7 @@ object for the second. The options are
     If set, the exchange will not be declared, this will allow the exchange
     to be deleted if you dont know its previous options.
 - `confirm`: boolean, default false.
-    If set, the exchange will be in confirm mode, and you will get a 
+    If set, the exchange will be in confirm mode, and you will get a
     'ack'|'error' event emitted on a publish, or the callback on the publish
     will be called.
 
@@ -522,25 +529,25 @@ instead.
 
 ### exchange.bind(srcExchange, routingKey [, callback])
 
-Binds the exchange (destination) to the given source exchange (srcExchange). 
-When one exchange is bound to another, the destination (or receiving) exchange 
-will receive all messages published to the source exchange that match the 
-given routingKey. 
+Binds the exchange (destination) to the given source exchange (srcExchange).
+When one exchange is bound to another, the destination (or receiving) exchange
+will receive all messages published to the source exchange that match the
+given routingKey.
 
 This method will emit `'exchangeBindOk'` when complete.
 
-Please note that Exchange to Exchange Bindings (E2E) are an extension to the 
-AMQP spec introduced by RabbitMQ, and that by using this feature, you will be 
-reliant on RabbitMQ's AMQP implementation. For more information on E2E 
+Please note that Exchange to Exchange Bindings (E2E) are an extension to the
+AMQP spec introduced by RabbitMQ, and that by using this feature, you will be
+reliant on RabbitMQ's AMQP implementation. For more information on E2E
 Bindings with RabbitMQ see:
 
 http://www.rabbitmq.com/e2e.html
 
 ### exchange.unbind(srcExchange, routingKey [, callback])
 
-Unbinds the exchange (destination) from the given source exchange (srcExchange). 
-This is the reverse of the exchange.bind method above, and will stop messages 
-from srcExchange/routingKey from being sent to the destination exchange. 
+Unbinds the exchange (destination) from the given source exchange (srcExchange).
+This is the reverse of the exchange.bind method above, and will stop messages
+from srcExchange/routingKey from being sent to the destination exchange.
 
 This method will emit `'exchangeUnbindOk'` when complete.
 

@@ -98,7 +98,7 @@
   "engines": {
     "node": "0.4 || 0.6 || 0.8 || 0.9 || 0.10 || 0.11 || 0.12"
   },
-  "homepage": "https://github.com/postwait/node-amqp",
+  "homepage": "https://github.com/hieutrtr/rova-amqp",
   "keywords": [
     "amqp"
   ],
@@ -117,6 +117,10 @@
     {
       "name": "postwait",
       "email": "jesus@omniti.com"
+    },
+    {
+      "name": "hieu",
+      "email": "hieutrantrung.it@gmail.com"
     }
   ],
   "name": "rova-amqp",
@@ -128,5 +132,5 @@
   "scripts": {
     "test": "make test"
   },
-  "version": "0.2.6"
+  "version": "0.2.7"
 }
